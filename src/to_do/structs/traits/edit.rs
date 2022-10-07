@@ -18,4 +18,12 @@ pub trait Edit {
         println!("\n\n{} is being set to pending\n\n", title);
 
     }
+
+    fn set_to_on_hold(&self, title:&String, state: &mut Map<String, Value>){
+        state.insert(title.to_string(), json!(String::from("on-hold")));
+        write_to_file("./state.json", state);
+
+        println!("\n\n{} is being set to on-hold\n\n", title);
+
+    }
 }
