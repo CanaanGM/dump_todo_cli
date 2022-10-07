@@ -1,16 +1,29 @@
+mod state;
 mod to_do;
+mod processes;
 
-use to_do::ItemType;
+use std::env;
+use state::{ read_file};
+use serde_json::value::Value;
+use serde_json::{Map};
+use processes::process_input;
 use to_do::to_do_factory;
-use to_do::structs::traits::create::Create;
+
 
 fn main() {
+    let args : Vec<String> = env::args().collect();
+    let command: &String = &args[1];
+    let title: &String = &args[2];
 
-    let to_do_item: Result<ItemType, &'static str> = to_do_factory("pending", "cooking");
-    match to_do_item.unwrap() {
-        ItemType::Pending(item) => item.create(&item.super_struct.title),
-        ItemType::Done(item) => println!("Its a {} item with the title {}.", item.super_struct.status, item.super_struct.title),
+    let state: Map<String, Value> = read_file("./state.json");
+    // println!("{:?}", state);
+
+    let status : String;
+    match &state.get(*&title) {
+        Some(result) => status = result.to_string().replace('\"', ""),
+        None => status = "pending".to_string()
     }
+    let item = to_do_factory(&status, title).expect(&status);
+    process_input(item, command.to_string(), &state);
 
-    println!("Hello, world!");
 }
